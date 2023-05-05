@@ -11,6 +11,8 @@ The 3 private flows are meant for the appropriate data conversion
    - scatter-gather to route to 3 flow references parallely
    - flow reference to refer appropriate privateflows
    - transform message for appropriate data conversions using map function
+   
+### Result
 
 main flow
 
@@ -24,7 +26,7 @@ processed files in the output folder
 
 ##### ![outputFolder](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/03-outputFolder.PNG)
 
-the actual file renemaed and moved to back up folder
+the actual file renemed and moved to back up folder
 
 ##### ![backupFolder](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/04-backupFolder.PNG)
  
