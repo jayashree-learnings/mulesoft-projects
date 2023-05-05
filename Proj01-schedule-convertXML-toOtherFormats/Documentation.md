@@ -26,7 +26,7 @@ processed files in the output folder
 
 ##### ![outputFolder](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/03-outputFolder.PNG)
 
-the actual file renemed and moved to back up folder
+the actual file renamed and moved to back up folder
 
 ##### ![backupFolder](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/04-backupFolder.PNG)
  
