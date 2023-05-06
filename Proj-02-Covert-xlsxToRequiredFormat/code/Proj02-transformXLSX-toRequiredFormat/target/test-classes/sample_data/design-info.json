@@ -1,0 +1,11 @@
+{
+  "sampleData": {
+    "765988c2-0b41-4467-af93-99af3a1bf03b": {
+      "vars-dataFormatHeader": "sample_data/java.dwl",
+      "vars-dataFormatQueryParam": "sample_data/java_1.dwl"
+    },
+    "a6691b11-be5e-430c-ae05-000a5beadfa4": {
+      "attributes": "sample_data/httprequestattributes.dwl"
+    }
+  }
+}

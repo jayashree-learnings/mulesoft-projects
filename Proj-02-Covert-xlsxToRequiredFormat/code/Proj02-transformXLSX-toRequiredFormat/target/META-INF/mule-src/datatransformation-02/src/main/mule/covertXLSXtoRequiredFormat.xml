@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="aded73a6-2753-49fb-a08b-ca7972391f7f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="MainFlow" doc:id="4120c783-2310-43ea-be1e-5538d5c6d8ee" >
+		<http:listener doc:name="Listener" doc:id="6053a696-c9d0-4a89-b15a-17ab16c917f2" config-ref="HTTP_Listener_config" path="/xlsx"/>
+		<ee:transform doc:name="variable-requiredDataFormat" doc:id="765988c2-0b41-4467-af93-99af3a1bf03b" >
+			<ee:message >
+			
+</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="requiredDataFormat" ><![CDATA[%dw 2.0
+output application/json
+
+import * from functions::requiredDataFormat
+var dataFormat_QueryParam = attributes.queryParams.format
+var dataFormat_Header = attributes.headers.'content-type'
+
+---
+createRequiredDataFormat(dataFormat_QueryParam, dataFormat_Header)
+
+  ]]></ee:set-variable>
+			</ee:variables>
+		
+</ee:transform>
+		<logger level="INFO" doc:name="requiredDataFormat" doc:id="b4d3bca6-d91f-4e00-8598-e78df2a79005" message="#['\n']*******the required format is #[vars.requiredDataFormat]"/>
+		<file:read doc:name="Read xlsx file" doc:id="7452d463-5421-483a-b21c-70bd03021c6c" path="C:\Users\sujit\Desktop\W3Schools-bookStore\input\bookStore.xlsx" outputMimeType="application/xlsx"/>
+		<choice doc:name="Choice" doc:id="d5134883-e57f-4645-93d8-00cfe8d833a0" >
+			<when expression='#[vars.requiredDataFormat == "csv"]'>
+				<ee:transform doc:name="to csv" doc:id="ee5ce2ab-7cf0-446f-897d-8b1302276990" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload.bookStoreSheet]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.requiredDataFormat == "json"]'>
+				<ee:transform doc:name="to json" doc:id="318a2567-73b9-404e-870c-c2e892959dab" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.bookStoreSheet]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.requiredDataFormat == "xml"]'>
+				<ee:transform doc:name="to xml" doc:id="9d1e5432-110d-4f0c-b736-51d909ae48f4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	"bookDetails" : {
+		"book": payload.bookStoreSheet
+	}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="invalid data format" doc:id="84d689de-a4be-4034-a922-6bd08247cc62" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.requiredDataFormat ++ " is invalid data format"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
