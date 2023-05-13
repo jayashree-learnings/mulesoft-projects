@@ -2,6 +2,10 @@
 
 The input folder is monitored for all files of the extension xml and is written to csv, json and xslx formats in output folder with appropriate name and time stamp. Once the file is read, it is renamed and moved to backup folder so that it is not deleted. Finally the list operation is used on the output folder to verify that the files are created. The entire process is tested using postman.
 
+xml file in the  monitored folder
+##### ![xmlformatFile](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/0-xmlFormatFile.PNG)  
+
+
 Scatter gather in used in the main flow which refers to 3 private flows, each corresponding to appropriate data conversion. A private flow containing a list operation is referred at the end to print the attributes and file names of the processed files.  
 
 - Main functionalities used 
