@@ -80,7 +80,7 @@ Two new records being added to the DB
 Logger message after adding two new records to the DB
 ##### ![LoggerMsgAfterAddingTwoRecInDB](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-05/03d-LoggerMsgAfterAddingTwoRecInDB.PNG)
 
-Only the two new records are appended to CSV 
+Only the two new records are appended to the same CSV (headers are also getting added since it is not set to false in the transform message)
 ##### ![TwoNewRecAppended](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-05/03e-TwoNewRecAppended.PNG)
 
 The scheduler re-checks again and confirms no new records are added to the DB
