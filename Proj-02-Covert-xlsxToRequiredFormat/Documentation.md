@@ -1,6 +1,11 @@
 ### Description
 
-The xlsx file is read and converted to one of the three data types (csv, json or xml) as specified by the user. The user specifies the required data format as a query parameter or in the request headers. If it is specified in both, priority is for data format specified in query parameter The entire process is tested using postman. If none is specified, it returns the data format in json. If invalid data type is specified, an appropriate  message is sent back to the user. The functionality needed to achieve this is stored as an external dwl file  and imported  
+The xlsx file is read and converted to one of the three data types (csv, json or xml) as specified by the user. 
+
+File to be read
+##### ![file](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-02/0-xlsxFileToBeRead.png)  
+
+The user specifies the required data format as a query parameter or in the request headers. If it is specified in both, priority is for data format specified in query parameter The entire process is tested using postman. If none is specified, it returns the data format in json. If invalid data type is specified, an appropriate  message is sent back to the user. The functionality needed to achieve this is stored as an external dwl file  and imported  
 
 - Main functionalities used 
    - read operation - to read the xlsx from the proper sheet
