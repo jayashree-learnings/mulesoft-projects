@@ -37,8 +37,7 @@ converting xml to csv
 ##### ![xmlTojson](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/02b-xmlTocsv.PNG)  
 
 
-converting xml to xlsx  
-
+converting xml to xlsx. Here bookSheet1 is the name of the xlsx sheet  
 ##### ![xmlTojson](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/02c-xmlToxlsx.PNG)  
 
 
@@ -55,8 +54,7 @@ processed files in the output folder
 
 ##### ![outputFolder](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/05-outputFolder.PNG)
 
-the actual file renamed and moved to back up folder  
-
+the actual file renamed and moved to back up folder 
 ##### ![backupFolder](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-01/04-backupFolder.PNG)
  
  
