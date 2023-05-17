@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="empProfile_json" format="json">
+      <types:shape format="weave" example="examples/empProfile-1.json"><![CDATA[%dw 2.0
+
+type empProfile_json = Array<{|  emp_id: Number {"typeId": "int"},   empName: String,   empDept: String,   empLocation: String,   empSalary: Number {"typeId": "double"}|} | Null> {"example": "[{\\\"emp_id\\\":1,\\\"empName\\\":\\\"a\\\",\\\"empDept\\\":\\\"IT\\\",\\\"empLocation\\\":\\\"US\\\",\\\"empSalary\\\":3350.24},{\\\"emp_id\\\":2,\\\"empName\\\":\\\"b\\\",\\\"empDept\\\":\\\"HR\\\",\\\"empLocation\\\":\\\"US\\\",\\\"empSalary\\\":2680.19},null]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+</types:mule>
