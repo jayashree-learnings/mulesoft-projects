@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	
+	<flow name="jmsInlineBrokerPublishFlow" doc:id="c71cd42e-8e55-4cc7-a77e-20dd9b239095" >
+		<scheduler doc:name="Scheduler" doc:id="0437dab8-03ae-4279-b4f7-31fdd529709f" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:retrieve doc:name="Retrieve value of maxEmpId" doc:id="4974ad6a-0369-4a02-9bd8-eaeea251a2b6" key="maxEmpId" target="maxEmpId">
+			<os:default-value ><![CDATA[#[0 as Number]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="value of maxEmpId" doc:id="d451ea5d-cd0c-42ac-875e-2566cba98283" message="#['\n']***value of maxEmpId is #[vars.maxEmpId] and type is #[typeOf(vars.maxEmpId)]"/>
+		<db:select doc:name="Select" doc:id="eae5c458-b900-47d6-9379-455f8e9fbe47" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from muleEmployee where emp_id > :maxEmpId]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{maxEmpId : vars.maxEmpId}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="67e11e1b-cf4c-40c3-849c-ee0ba25ca1a9">
+			<when expression="#[not isEmpty(payload)]">
+				<os:store doc:name="Store the maxEmpId of the selected records" doc:id="9944a51d-44ea-4a35-bba5-67af854a70f1" key="maxEmpId">
+					<os:value ><![CDATA[#[max(payload.*emp_id)]]]></os:value>
+				</os:store>
+				<ee:transform doc:name="to json" doc:id="17bdf000-dd97-47d6-a7f6-76c30eb5a1a5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<jms:publish doc:name="Publish to accountsQ" doc:id="85738744-76c3-43d6-9686-2dea6f5d8394" config-ref="JMS_Config" destination="accountsQ">
+			<jms:message>
+				<jms:body><![CDATA[#[output application/json
+---
+payload]]]></jms:body>
+				<jms:properties><![CDATA[#[{
+	"training" : "it comes in attr section.this user property of publish"
+}]]]></jms:properties>
+			</jms:message>
+		</jms:publish>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="response message" doc:id="c11f21f3-29bd-4e86-a87e-23319a479614" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var maxEmpId = vars.maxEmpId
+---
+
+{"current value of maxEmpId" : maxEmpId,
+"result" : "no new records found"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="no new records added to DB" doc:id="1ed5fd06-8d98-42f1-8a94-970de4028d16" message="#['\n'] *********no new records added to DB #['\n'] message is #[payload]"/>
+			</otherwise>
+		</choice>
+		<error-handler ref = "errorHandlingPublishFlow"/>
+			
+		
+	</flow>
+	<flow name="jmsInlineBrokerConsumeFlow" doc:id="7b2e12f6-0926-4a4f-b116-192e7b1bf327" >
+		<jms:listener doc:name="On New Message" doc:id="1c67ce98-97f1-487d-b537-cd3dd642134f" config-ref="JMS_Config" destination="accountsQ" inboundContentType="application/json" numberOfConsumers="1">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+			<jms:response >
+				<jms:properties ><![CDATA[#[{"alpaha":"bet"}]]]></jms:properties>
+			</jms:response>
+		</jms:listener>
+		<logger level="INFO" doc:name="payload" doc:id="fd8c2370-d1fd-4722-b5d5-18d94f696146" message="['\n']***pl from consumer is #[payload]"/>
+		<ee:transform doc:name="to CSV" doc:id="c49cd1dc-2f07-4606-b0e3-47b8174c5c5b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload map (val,index) -> {
+	empName: val.empName,
+	empLocation: val.empLocation,
+	empSalary: val.empSalary as String,
+	empDept: val.empDept,
+	emp_id: val.emp_id as String,
+	timeOfProcessing : now()
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write as csv file" doc:id="f027855e-c2e9-46e7-b3ec-66a4615df59c" config-ref="File_Config" path='#["jmsConsumerWaterMarked-EmpDetails" ++ ".csv"]' mode="APPEND"/>
+		<error-handler ref = "errorHandlingConsumeFlow"/>		
+	</flow>
+	<flow name="clearOSFlow" doc:id="66192007-a8e3-4047-8c41-51dd387ddf20" >
+		<http:listener doc:name="Listener" doc:id="c2abb3f3-a74b-4d96-9aae-1af91daeb0e1" config-ref="HTTP_Listener_config" path="osclear"/>
+		<os:clear doc:name="Clear" doc:id="9be8537b-a02c-4204-89ea-77e28fa609da" />
+	</flow>
+	<flow name="jms-activemq-inlinebrokerFlow" doc:id="e726ada9-ebaf-43d7-943c-e6931e2e51ab" >
+		<http:listener doc:name="Listener" doc:id="74694a3a-a24d-438f-8dc3-ea0e40ac52ad" config-ref="HTTP_Listener_config" path="rtOS"/>
+		<os:retrieve-all doc:name="Retrieve all" doc:id="497e0eff-37e4-4640-8410-254f196ef213" />
+	</flow>
+</mule>

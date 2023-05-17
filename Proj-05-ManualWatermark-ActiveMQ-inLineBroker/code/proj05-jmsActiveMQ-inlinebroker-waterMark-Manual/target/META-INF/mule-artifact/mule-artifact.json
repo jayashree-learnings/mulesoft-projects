@@ -1,0 +1,32 @@
+{
+  "configs": [
+    "errorHandling.xml",
+    "jms-activemq-inlinebroker.xml",
+    "globalConfigurations.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:jmsqueue-activemq:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.4.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "configProperties.yaml",
+        "errorHandling.xml",
+        "examples/empDetails.json",
+        "examples/JmsConsumer-EmpDetails09-May-2023-05-35-38.csv",
+        "globalConfigurations.xml",
+        "jms-activemq-inlinebroker.xml",
+        "log4j2.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

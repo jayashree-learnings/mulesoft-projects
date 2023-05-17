@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd 
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="5df124ae-35dc-4b12-a3cf-49eab4f306e4" >
+		<jms:active-mq-connection specification="JMS_1_0_2b">
+			<jms:factory-configuration />
+		</jms:active-mq-connection>
+	</jms:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f0081acd-b483-4df2-86dd-fb3f5bdf1ee1" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="8eff35c6-5c66-4d07-915f-0c0756573279" >
+		<db:mssql-connection host="${sqlServer.host}" port="${sqlServer.port}" user="${sqlServer.username}" password="${sqlServer.password}" databaseName="${sqlServer.dbName}" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="1878e283-3db7-474c-a0ee-03096c263e2f" file="configProperties.yaml" />
+	<file:config name="File_Config" doc:name="File Config" doc:id="3df9f8ea-19fe-41e6-b396-403a3110d829" >
+		<file:connection workingDir="C:\Users\sujit\Desktop\W3Schools-bookStore" />
+	</file:config>
+</mule>

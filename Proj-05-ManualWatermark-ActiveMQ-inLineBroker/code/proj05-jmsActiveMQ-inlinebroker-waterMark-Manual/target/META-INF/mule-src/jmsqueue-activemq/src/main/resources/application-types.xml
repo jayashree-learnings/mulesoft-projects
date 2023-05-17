@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="emp-csv" format="csv">
+      <types:shape format="weave" example="examples/JmsConsumer-EmpDetails09-May-2023-05-35-38.csv"><![CDATA[%dw 2.0
+
+type emp_csv = Array<{|  empName: String,   empLocation: String,   empSalary: String,   empDept: String,   emp_id: String|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+    <types:type name="emp-json" format="json">
+      <types:shape format="weave" example="examples/empDetails.json"><![CDATA[%dw 2.0
+
+type emp_json = Array<{|  emp_id: Number {"typeId": "int"},   empName: String,   empDept: String,   empLocation: String,   empSalary: Number {"typeId": "double"}|}> {"example": "[{\\\"emp_id\\\":1,\\\"empName\\\":\\\"a\\\",\\\"empDept\\\":\\\"IT\\\",\\\"empLocation\\\":\\\"US\\\",\\\"empSalary\\\":2000.00},{\\\"emp_id\\\":2,\\\"empName\\\":\\\"b\\\",\\\"empDept\\\":\\\"HR\\\",\\\"empLocation\\\":\\\"US\\\",\\\"empSalary\\\":2050.00}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#c49cd1dc-2f07-4606-b0e3-47b8174c5c5b">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="emp-json"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="emp-csv"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

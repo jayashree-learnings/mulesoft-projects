@@ -1,0 +1,8 @@
+empName,empLocation,empSalary,empDept,emp_id
+a,US,3350.24,IT,1
+b,US,2680.19,HR,2
+c,AUS,2747.21,IT,3
+d,EU,2747.21,HR,4
+e,EU,2747.21,Sales,5
+f,AUS,2747.21,HR,6
+g,EU,2747.21,Sales,7

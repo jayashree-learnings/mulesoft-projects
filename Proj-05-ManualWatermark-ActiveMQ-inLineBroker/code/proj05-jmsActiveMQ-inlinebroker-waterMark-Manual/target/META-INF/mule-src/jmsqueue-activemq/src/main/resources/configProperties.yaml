@@ -1,0 +1,10 @@
+sqlServer:
+  host: "localhost"
+  port: "1434"
+  username: "sa"
+  password: "1234"
+  dbName: "muleDB"
+  
+http:
+  port: "8081"
+  
