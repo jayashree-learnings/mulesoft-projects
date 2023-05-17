@@ -1,0 +1,32 @@
+{
+  "configs": [
+    "SyncDBWithSF-JMS-batchprocess.xml",
+    "errorHandling.xml",
+    "globalConfigurations.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:proj-06-salesforceintegration-batchprocessing:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.4.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "configProperties.yaml",
+        "errorHandling.xml",
+        "examples/empProfile-1.json",
+        "examples/empProfile.json",
+        "globalConfigurations.xml",
+        "log4j2.xml",
+        "SyncDBWithSF-JMS-batchprocess.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

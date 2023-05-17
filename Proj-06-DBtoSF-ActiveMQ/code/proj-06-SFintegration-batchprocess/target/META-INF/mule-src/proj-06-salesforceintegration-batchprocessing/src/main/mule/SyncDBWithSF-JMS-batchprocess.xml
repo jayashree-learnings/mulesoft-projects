@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	
+	<flow name="jmsPublish-DB_resultsFlow" doc:id="8e462275-d085-4874-9446-d2d324b38af4" >
+		<http:listener doc:name="Listener" doc:id="5c2b32d0-32a2-403b-8fba-13d30e3448b9" config-ref="HTTP_Listener_config" path="/j"/>
+		<db:select doc:name="Select all records from muleEmployee" doc:id="c67176f4-b17d-43b8-9503-4d8c46525ff5" config-ref="Database_Config" >
+			<db:sql ><![CDATA[select * from muleEmployee]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="payload" doc:id="d5f8ca96-7331-4cc6-9ebe-e9893b1ade1d" message="#['\n']#['\n']***pl from direct db selection is #[payload] with mimetype #[payload.^mediaType]" />
+		<ee:transform doc:name="Transform Message" doc:id="2dae58e8-b51b-4d62-a19f-2a8d9289b83f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish to DBtoSF.Q" doc:id="e50df521-359a-4841-866a-a68f128eb440" config-ref="JMS_Config" destination="DBtoSF.Q"/>
+		<error-handler ref = "jmsPublishErrorHandler" />	
+		
+	</flow>
+	<flow name="jmsReceive-CheckIfAccountExistsFlow" doc:id="686eaf65-9163-48c0-9a54-cae5a40a8973" >
+		<jms:listener doc:name="On New Message on  DBtoSF.Q" doc:id="baa7cb4c-0f12-492a-b3ce-e3da0b84a97a" config-ref="JMS_Config" destination="DBtoSF.Q" inboundContentType="application/json" numberOfConsumers="1"/>
+		<logger level="INFO" doc:name="payload and mime type" doc:id="1034b054-6b4b-43a0-98ce-91f3c0bfeb43" message="#['\n']#['\n']***PL in the jmsReceiveFlow is #[payload] with mimetype #[payload.^mediaType]"/>
+		<ee:transform doc:name="json to java" doc:id="0da5356a-b557-48b8-ac0d-6e8c782dde98" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="payload and mime type" doc:id="9bae2438-e6c8-4a81-82c1-c59dfbb3ce28" message="#['\n']#['\n']***PL in the jmsReceiveFlow after transform msg is #[payload] with mimetype #[payload.^mediaType]"/>
+		<batch:job jobName="batchJob" doc:id="bfe3cbfd-bb2f-45c9-a786-541124505c43" >
+			<batch:process-records >
+				<batch:step name="step01-checkIfAccountExists" doc:id="e7823ace-2472-4844-bc2d-2881150d0c9d" >
+					<salesforce:query doc:name="Query if emp_id already exists" doc:id="c0fa5c75-5c58-4a1e-9cd9-ebc60093f8fe" config-ref="Salesforce_Config" target="recordExistsInSF" targetValue="#[(sizeOf(payload)&gt;0)]" readTimeoutUnit="MICROSECONDS">
+						<salesforce:salesforce-query ><![CDATA[select emp_id__c,Name,empDept__c,empLocation__c,empSalary__c 
+from emp_profile__c where emp_id__c = :id]]></salesforce:salesforce-query>
+						<salesforce:parameters ><![CDATA[#[{"id": payload.emp_id}]]]></salesforce:parameters>
+						<salesforce:headers />
+					</salesforce:query>
+					<ee:transform doc:name="response message for each record" doc:id="2165faf7-85a4-470e-8f35-75ac6a32aa0f" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="response_msg" ><![CDATA[%dw 2.0
+output application/json
+---
+{	
+   "exists-id" : vars.recordExistsInSF,	
+   "media type of PL for each record" : payload.^mediaType,
+   "type of record" : typeOf(payload),
+   "payloadInEachStep" : payload
+ }]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<logger level="INFO" doc:name="response message" doc:id="c5574cdb-2e41-4a85-98d6-2c09602e1767" message="#['\n']****the answer of query is in step 01  #[vars.response_msg]"/>
+				</batch:step>
+				<batch:step name="step02-writeToSF" doc:id="b2545402-a130-4418-a3ad-25e51a146c56" acceptExpression="#[(vars.recordExistsInSF==false)]">
+					<logger level="INFO" doc:name="response msg" doc:id="795365a2-3334-4269-8f4c-3adbbd3a6f9e" message="#['\n']#['\n']**** in step 02, response msg is  #[vars.response_msg] and #['\n'] pl is #[payload] with mimetype #[payload.^mediaType]" />
+					<batch:aggregator doc:name="batchAggregator-Size-03" doc:id="4599bd97-2940-4eed-967b-44f4eab0e2b9" size="2">
+						<ee:transform doc:name="mapping to custom fields" doc:id="bbaeec9b-d188-4205-ac74-22db27427e41">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01.empName,
+	emp_id__c: payload01.emp_id,
+	empDept__c: payload01.empDept,
+	empLocation__c: payload01.empLocation,
+	empSalary__c: payload01.empSalary
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+						<salesforce:create type="emp_profile__c" doc:name="Create" doc:id="d5358d05-b693-4c81-8fcc-251081295896" config-ref="Salesforce_Config" />
+						<ee:transform doc:name="payload to json" doc:id="26d5dfaa-d1d7-4fd0-97cb-f3fa416ce9d4" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="6a6e4a18-4216-4d80-b428-9d0d25bb24b1" message="#['\n']#['\n']****in step 02 aggr,  payload corresponsding to each rec is #[payload] #['\n']with mimetype #[payload.^mediaType]"/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+		</batch:job>
+		<ee:transform doc:name="Transform Message" doc:id="98919f4c-3f21-4a53-8d96-583ff5eb104b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler ref = "jmsConsumeErrorHandler" />
+			
+		
+	</flow>
+</mule>

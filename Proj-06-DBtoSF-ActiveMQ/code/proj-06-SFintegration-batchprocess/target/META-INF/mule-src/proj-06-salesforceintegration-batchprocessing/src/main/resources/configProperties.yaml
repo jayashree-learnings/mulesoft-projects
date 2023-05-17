@@ -1,0 +1,18 @@
+sqlServer:
+  host: "localhost"
+  port: "1434"
+  username: "sa"
+  password: "1234"
+  dbName: "muleDB"
+  
+http:
+  port: "8081"
+  
+activeMQ:
+  username: "admin"
+  password: "admin"
+
+sfdc:
+  username: "jsm421235@gmail.com"
+  password: "Sandhyanew1985!"
+  token: "wnGzHWYR3jCLepviVNKYTOO3"

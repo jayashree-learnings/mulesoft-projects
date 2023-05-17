@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="jmsPublishErrorHandler" doc:id="53baaaf8-2b35-4c01-81d7-0cca7c61fed3"> 
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6e49ada6-ff15-42f1-afa1-7e7ba945f77b" >
+				<set-payload value="error occured in publish to jms flow" doc:name="error occured in publish to jms flow" doc:id="d58720af-ec93-4a3a-b867-a990848872b5" />
+			</on-error-continue>	
+	</error-handler>
+	<error-handler name="jmsConsumeErrorHandler" doc:id="78551dde-f38b-4757-9b75-3a0750d0a300" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e3ab1d25-a05c-4c5f-a111-1e89b046b8bf" >
+				<set-payload value="error occured in consuming the jms msg" doc:name="error occured in consuming the jms msg" doc:id="4972b984-5474-4964-8b94-0ae1288d808d" />
+			</on-error-continue>
+	</error-handler>
+</mule>
