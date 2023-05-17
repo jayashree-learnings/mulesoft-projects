@@ -1,0 +1,16 @@
+[
+  {
+    "emp_id": 1,
+    "empName": "a",
+    "empDept": "IT",
+    "empLocation": "US",
+    "empSalary": 2000.00
+  },
+  {
+    "emp_id": 2,
+    "empName": "b",
+    "empDept": "HR",
+    "empLocation": "US",
+    "empSalary": 2050.00
+  }
+]
