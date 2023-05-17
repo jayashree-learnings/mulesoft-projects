@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<flow name="mainFlow" doc:id="1078a295-23d8-470f-bbb7-0a4136d31bb8" >
+		<http:listener doc:name="Listener" doc:id="119542c7-6e59-4a7d-a4e9-e66a20db8941" config-ref="HTTP_Listener_config" path="/sg"/>
+		<set-variable value="#[attributes.queryParams.name]" doc:name="name" doc:id="5f7f6684-63d8-4723-b83d-a19d9f4cda2b" variableName="name"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="d22c75d8-af20-4edd-b1d0-6395092c3e1a" >
+			<route>
+				<try doc:name="Try" doc:id="1dcf4531-31eb-4b1b-9c4a-254c44a8ea64" >
+					<http:request method="GET" doc:name="genderize api" doc:id="1d5fa5f4-3d5d-44b0-9981-75a7412b9a29" url='#["https://api.genderize.io?name=" ++ vars.name]'/>
+					<error-handler ref="genderizeApi_errorHandler"/>		
+				</try>
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="9d491a83-956d-4d9f-b1af-9277fa7f4bf9" >
+					<http:request method="GET" doc:name="Request nationalize api" doc:id="ccdd97ed-18f3-4c52-baff-2e0c6e04f58b" url='#["https://api.nationalize.io?name=" ++ vars.name]' />
+					<error-handler ref="nationalizeApi_errorHandler" />							
+				</try>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="to JSON" doc:id="83b421b2-e35d-433c-b5c8-2cd9811605f1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var name  = vars.name
+---
+{
+ "gender of $(name)"  :  payload."0".payload,
+ "country of $(name)" :  payload."1".payload 
+ }
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="payload" doc:id="70f91130-fcc2-481d-8f13-9167f4642b89" message="['\n'] ***the result is #[payload]"/>
+		<error-handler ref = "mainFlow_errorHandler" />					
+	</flow>
+</mule>

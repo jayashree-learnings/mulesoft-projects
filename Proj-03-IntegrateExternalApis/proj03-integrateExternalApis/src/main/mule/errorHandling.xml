@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="mainFlow_errorHandler" doc:id="1773a3e8-64b7-4884-ba22-b19fa0e10c21"> 	
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9c85d9ec-6085-4600-b2ef-aa77f47d5e1a" >
+			<set-payload value='#["error in main flow"]' doc:name="error in main flow" doc:id="b3808e22-a47f-4ee3-b92f-541e07947f6e" />
+		</on-error-continue>	
+	</error-handler>	
+	<error-handler name="nationalizeApi_errorHandler" doc:id="ea2af98b-3cce-4f75-b17a-1b5d0702885b" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f24635bf-0b05-4103-937d-f694b95213bd" >
+			<set-payload value='#["error in nationalize api"]' doc:name="error in nationalize api" doc:id="664b0fd6-ee57-4fae-89d6-d63dd08416e2" />
+		</on-error-continue>
+	</error-handler>	
+	<error-handler name="genderizeApi_errorHandler" doc:id="4a055eea-becc-4bbd-8e11-becb61de3498">
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d54f2fae-3a9c-4e74-b137-204bd3a7cdbc" >
+			<set-payload value='error in genderize api ' doc:name="error in genderize api" doc:id="cf4f853d-62f4-4a02-886a-ae63835472f9" />
+		</on-error-continue>	
+	</error-handler>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mule>
