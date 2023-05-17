@@ -1,6 +1,0 @@
-%dw 2.0
-
-type auto_1f2dd427_b64c_48b5_8ae3_ccd92a0ef40e_Output_Payload = Array<{|  "﻿category": String,   title: String,   lang: String,   author: String,   year: String,   price: String|}> {"isQuotedString": "false",
-"header": "true",
-"headerLineNumber": "0"}
-
