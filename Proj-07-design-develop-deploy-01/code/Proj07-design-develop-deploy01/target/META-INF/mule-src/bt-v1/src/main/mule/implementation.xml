@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<flow name="createAccountFlow" doc:id="ccbf00ce-9648-45a2-8156-d205301a2f54" >
+		 <flow-ref doc:name="variableSettingFlow" doc:id="752ac6fa-3f43-4731-9722-3c7490a0e973" name="variableSettingFlow" />
+		<flow-ref doc:name="checkCustomerCredentialsFlow" doc:id="abb0f165-006a-45ec-bc03-b08c7988265a" name="checkCustomerCredentialsFlow" />
+		<choice doc:name="Choice" doc:id="c0bd5994-d4a2-49f6-ab43-43f003adc710">
+			<when expression="#[vars.numberOfRecords==0]">
+				<db:insert doc:name="Insert" doc:id="f8040f52-7170-4400-ba9c-62bbb632c564" config-ref="Database_Config">
+					<db:sql><![CDATA[insert into muleTransactions(custName,CustAccNum,bankName,branchName,accountType,atmPin,totalBalance,mailid) 
+values(:custName,:CustAccNum,:bankName,:branch,:accountType,:atmPin,:totalBalance,:mailid )]]></db:sql>
+					<db:input-parameters><![CDATA[#[output application/java
+---
+{
+	custName: vars.inputPayload.customerName,
+	CustAccNum: vars.inputPayload.custAccNum,
+	bankName: vars.inputPayload.bank,
+	branch: vars.inputPayload.branchName,
+	accountType: vars.inputPayload.accountType,
+	atmPin: vars.inputPayload.atmPin,
+	totalBalance: vars.inputPayload.depositAmount,
+	mailid: vars.inputPayload.mailid
+}]]]></db:input-parameters>
+				</db:insert>
+				<ee:transform doc:name="Transform Message" doc:id="06b2067c-d6b6-4cf2-8bf8-e98838846aec">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var msg = ("Created account for " ++ vars.inputPayload.customerName as String ++ " with account number " 
+			++ vars.inputPayload.custAccNum as String ++ " in " ++ vars.inputPayload.bank as String ++
+			" at "++ vars.inputPayload.branchName ++ " branch ")
+---
+{
+  "code" : 200,
+  "message":  msg
+
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="a00eeeed-330c-4c41-acb7-356b780b41c5">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var msg = "Account already exists for " ++ vars.inputPayload.customerName as String ++ 
+		" with account number " ++ vars.inputPayload.custAccNum as String ++ " in " ++ 
+		 vars.inputPayload.bank as String ++ " at "++ vars.inputPayload.branchName ++ " branch"
+---
+	
+msg
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<error-handler ref  = "createAccountFlowErrorHandler"/>
+	
+	</flow>
+
+	<flow name="checkBalanceFlow" doc:id="4d1818c2-160e-45c8-b04b-1b36b86ba9eb" >
+		<flow-ref doc:name="variableSettingFlow" doc:id="cb77728e-18c2-475f-a668-6335498f0258" name="variableSettingFlow"/>
+		<flow-ref doc:name="checkCustomerCredentialsFlow" doc:id="63d737e8-cb57-4394-9b56-44c29f81fd19" name="checkCustomerCredentialsFlow"/>
+		<choice doc:name="Choice" doc:id="6cbb5d54-b2ec-4db0-aed1-7a79ce671cec" >
+			<when expression="#[vars.numberOfRecords==0]">
+				<ee:transform doc:name="Transform Message" doc:id="b9fbc013-6135-4dc7-ad4e-7c9a6116f248" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+var msg = "Account does NOT exist for the account number " ++ vars.inputPayload.custAccNum as String ++ " in " ++ 
+		 vars.inputPayload.bank as String ++ " at "++ vars.inputPayload.branchName ++ " branch"
+---
+	
+msg
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="validateAtmPinFlow" doc:id="6389dd84-2248-4557-991a-e220dc62c1cd" name="validateAtmPinFlow"/>
+				<choice doc:name="Choice" doc:id="2da4ea50-0f97-4381-9663-e4acd7c439b6" >
+					<when expression="#[vars.validAtmPin==0]">
+						<ee:transform doc:name="Transform Message" doc:id="a60dc147-6747-43b7-9966-c180838f29b6" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"The entered pin " ++ vars.inputPayload.atmPin ++ " is invalid"]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
+					<otherwise >
+						<ee:transform doc:name="Transform Message" doc:id="b14513eb-2b0d-4ce1-bde3-54f4cf401706" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var msg = "The balance is " ++ vars.db_balanceAmount
+---
+{
+code: 200,
+ message: msg  
+ }
+
+]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</otherwise>
+				</choice>
+			</otherwise>
+		</choice>
+		<error-handler ref = "checkBalanceFlowErrorHandler" />	
+	</flow>	
+	
+	<flow name="withdrawAmountFlow" doc:id="67f45e7b-a455-460d-bced-6bde5a88b346" >
+		<flow-ref doc:name="variableSettingFlow" doc:id="0f81ddef-cafb-49b2-9cc6-39f75e7df6cd" name="variableSettingFlow" />
+		<flow-ref doc:name="checkCustomerCredentialsFlow" doc:id="4e5ada04-217c-4356-b012-783f76e3ed95" name="checkCustomerCredentialsFlow" />
+		<choice doc:name="Choice" doc:id="ade9b66b-16be-4561-b7a8-857d6e909cc1">
+			<when expression="#[vars.numberOfRecords==0]">
+				<ee:transform doc:name="Transform Message" doc:id="9d57465d-2f54-4c5e-92eb-0b90eb2af751">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+
+var msg = "Account does NOT exist for the account number " ++ vars.inputPayload.custAccNum as String ++ " in " ++ 
+		 vars.inputPayload.bank as String ++ " at "++ vars.inputPayload.branchName ++ " branch"
+---
+	
+msg
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<flow-ref doc:name="validateAtmPinFlow" doc:id="cd94a50f-52f6-4ef6-bacd-af8238a309b0" name="validateAtmPinFlow" />
+				<choice doc:name="Choice" doc:id="8642b81a-51cc-4735-9c45-0aa59bb36e29">
+					<when expression="#[vars.validAtmPin==0]">
+						<ee:transform doc:name="Transform Message" doc:id="f3ed657e-5dde-4361-8bb6-04dcd102cc7d">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+"The entered pin " ++ vars.inputPayload.atmPin ++ " is invalid"]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+					</when>
+					<otherwise>
+						<flow-ref doc:name="checkSufficientBalanceFlow" doc:id="04d2a681-3ca5-4abb-8741-6f80bdea7ec6" name="checkSufficientBalanceFlow" />
+						<choice doc:name="Choice" doc:id="8e90ba41-11cd-4254-bb3b-a58a235654d9">
+							<when expression="#[vars.sufficientBalance==0]">
+								<ee:transform doc:name="Transform Message" doc:id="6d1906bc-d06f-49c7-93aa-a1fda90bbbb4">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+var msg = "Insufficient balance for  account number " ++ vars.inputPayload.custAccNum as String ++ " in " ++ 
+		 vars.inputPayload.bank as String ++ " at "++ vars.inputPayload.branchName ++ " branch"
+---
+	
+msg
+]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+							</when>
+							<otherwise>
+								<db:update doc:name="Update" doc:id="b451bb14-ba3a-436b-bad6-c1900e58bafe" config-ref="Database_Config">
+									<db:sql><![CDATA[update muleTransactions 
+set totalBalance = totalBalance - :withdrawAmount 
+where bankName = :bankName AND CustAccNum = :accntnum]]></db:sql>
+									<db:input-parameters><![CDATA[#[{	
+	bankName : vars.inputPayload.bank ,	
+	accntnum : vars.inputPayload.custAccNum,
+	withdrawAmount : vars.inputPayload.withdrawAmount
+}]]]></db:input-parameters>
+								</db:update>
+								<ee:transform doc:name="Transform Message" doc:id="763d5fbf-d1a1-41de-98e4-270b2b02e001">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/json 
+
+var updated_bal = (vars.db_balanceAmount - vars.inputPayload.withdrawAmount)
+var numRows = payload.affectedRows
+--- 
+{   
+	"code" : 200,
+	"msg" : "The balance is updated from " ++  vars.db_balanceAmount ++ 
+             " to " ++ updated_bal ++ " affecting " ++  numRows ++ " rows"
+			
+}			
+]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+							</otherwise>
+						</choice>
+					</otherwise>
+				</choice>
+			</otherwise>
+		</choice>
+		<error-handler ref = "withdrawAmountFlowErrorHandler" />	
+	</flow>
+	
+	<flow name="variableSettingFlow" doc:id="b49676a4-254a-47ba-abf9-4b915ad192d1" >
+		<set-variable value="#[payload]" doc:name="save payload as variable" doc:id="2a36a5eb-6740-48b6-b1cb-610e8d810394" variableName="inputPayload" />
+		<error-handler ref = "variableSettingFlowErrorHandler" />		
+	</flow>
+	
+	<flow name="checkCustomerCredentialsFlow" doc:id="52e031c4-8689-4010-b2e3-84936a44456d">
+		<db:select doc:name="Select matching accountNumber bankName branchName" doc:id="72d69453-7c50-4935-b611-ec9c3efaa170" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from muleTransactions 
+where bankName = :bankName 
+AND custAccNum = :accntnum 
+AND branchName = :branch
+]]></db:sql>
+			<db:input-parameters><![CDATA[#[{	
+	bankName : vars.inputPayload.bank ,	
+	accntnum : vars.inputPayload.custAccNum,
+	branch : vars.inputPayload.branchName
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="store selected details as variables db_balanceAmount db_atmPin numberOfRecords" doc:id="e43443a0-eba7-4b72-9a59-49c608db62a4">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="numberOfRecords"><![CDATA[%dw 2.0
+output application/java
+---
+ if(isEmpty(payload)) 0 else sizeOf(payload)]]></ee:set-variable>
+				<ee:set-variable variableName="db_balanceAmount"><![CDATA[%dw 2.0
+output application/java
+---
+payload[0].totalBalance]]></ee:set-variable>
+				<ee:set-variable variableName="db_atmPin"><![CDATA[%dw 2.0
+output application/java
+---
+payload[0].atmPin]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="36cdee91-d11b-4f11-8a26-b8f4a71df5cd" message="#['\n']#['\n']*****the records selected is #[vars.numberOfRecords] of pin #[vars.db_atmPin] balance is #[vars.db_balanceAmount]" />
+		<error-handler ref="checkCustomerCredentialsFlowErrorHandler" />
+	</flow>
+	
+	<flow name="validateAtmPinFlow" doc:id="e1a6a6d0-9f52-406c-8403-6dec7b982291">
+		<ee:transform doc:name="var validAtmPin" doc:id="9488711e-1992-4e25-a0bc-512be419a472">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="validAtmPin"><![CDATA[%dw 2.0
+output application/java
+var valid = if (vars.db_atmPin == vars.inputPayload.atmPin ) 1 else 0
+---
+valid]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<error-handler ref="validateAtmPinFlowErrorHandler" />
+	</flow>
+	
+	<flow name="checkSufficientBalanceFlow" doc:id="8d3aecfa-59d9-45f2-872e-2aaf7d30da6a">
+		<ee:transform doc:name="Transform Message" doc:id="992e0b04-3ee9-418b-ba9b-93cf6f054a74">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="sufficientBalance"><![CDATA[%dw 2.0
+output application/java
+var sufficient = if (vars.db_balanceAmount > vars.inputPayload.withdrawAmount) 1 
+				 else 0
+---
+sufficient]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<error-handler ref = "checkSufficientBaalanceFlowErrorHandler" />
+	</flow>
+				
+</mule>

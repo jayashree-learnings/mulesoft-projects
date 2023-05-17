@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	 
+	 
+	 
+	 <http:listener-config name="bank-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${http.port}" />
+    </http:listener-config>
+    <apikit:config name="bank-api-config" api="resource::251dea52-367d-4d3f-aedf-9aaaf94738aa:bank-api:1.0.0:raml:zip:bank-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="239b3582-343e-4779-a69b-9d22a1772c76" >
+		<db:my-sql-connection host="${mySql.host}" port="${mySql.port}" user="${mySql.username}" password="${mySql.password}" database="${mySql.dbName}" />
+	
+</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="5dd5beb3-5e7c-4209-95a1-9ae233b01068" file="configProperties.yaml" />
+	<api-gateway:autodiscovery apiId="${apiManager.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="c19e6fe5-3a12-4dbe-863a-1521b58339c6" flowRef="bank-api-main" />
+
+</mule>

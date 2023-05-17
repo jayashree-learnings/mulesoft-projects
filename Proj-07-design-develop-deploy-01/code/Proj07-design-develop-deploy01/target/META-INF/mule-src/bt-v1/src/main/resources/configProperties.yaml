@@ -1,0 +1,17 @@
+mySql:
+  host: "sql7.freesqldatabase.com"
+  port: "3306"
+  username: "sql7618737"
+  password: "Z9ch3HQR2u"
+  dbName: "sql7618737"
+  
+http:
+  port: "8081"
+  
+apiManager:
+  id: "18699158"
+  
+clientSandbox:
+  id: "cbc881d2505e4d259d144c8516811772"
+  secret: "F77FC08Ed5B249dD9adD7074B0823D3B"
+  

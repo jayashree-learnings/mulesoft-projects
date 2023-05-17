@@ -1,0 +1,14 @@
+%dw 2.0
+
+type auto_ccbf00ce_9648_45a2_8156_d205301a2f54_Input_Payload = {
+  atmPin: String, 
+  depositAmount: Number, 
+  bank: "ING" | "KPN", 
+  accountType: "current" | "savings", 
+  branchName: "ING2" | "KPN2" | "KPN1" | "ING1", 
+  mailid: String, 
+  custAccNum: String, 
+  customerName: String, 
+  _?: Any
+}
+
