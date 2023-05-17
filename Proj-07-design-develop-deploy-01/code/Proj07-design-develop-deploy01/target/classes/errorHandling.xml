@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="bank-api-main-errorHandler" doc:id="bba4d85c-1e69-412a-9b57-12d3d562497d" >
+		<on-error-propagate type="APIKIT:BAD_REQUEST">
+                <set-variable value="400" doc:name="statusCode" doc:id="432702d5-4aaf-4ada-a2ab-53035e3e0c40" variableName="statusCode"/>
+			<ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var status_code = vars.httpStatus
+---
+{message: "Bad request",
+ "Description" : error.description,
+ "status" : vars.statusCode
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="5b6081b6-cd4e-4016-b721-3c979ddcbe7f" message="#['\n']#['\n']*****the error status is #[vars.httpStatus] from transform msg and it is #[vars.statusCode] from set variable"/>
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var status_code = vars.httpStatus
+---
+{message: "Not acceptable",
+"statuCode" : status_code,
+"reason" : error.description
+	
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>	
+	</error-handler>	
+	
+	<error-handler name="bank-api-console-errorHandler" doc:id="ac45284b-7a7d-4c81-bfb7-6080ba5bd68c" >
+		<on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+	</error-handler>	
+	
+	<error-handler name="createAccountFlowErrorHandler" doc:id="2dad490d-be51-4709-a895-2a0abed67c91" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="61fae481-d83a-40fb-8419-47c92bc8cb50" type="DB:BAD_SQL_SYNTAX">
+				<set-payload value="DB syntax error" doc:name="DB syntax error" doc:id="4902ba0a-0d47-4b0b-87d6-c4c814c03703" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9be1d27c-5b87-4179-91ce-5ce411716b25" type="DB:QUERY_EXECUTION">
+				<set-payload value="DB query execution error" doc:name="DB query execution error" doc:id="35054231-be02-429a-b9f4-9dbbd4aca4ef" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="0dc606d0-328b-44a8-a9a9-57f8f775c48a" type="DB:CONNECTIVITY">
+				<set-payload value="DB connectivity error" doc:name="DB connectivity error" doc:id="9c666c63-4455-44e5-b878-3d467142effb" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue Any" doc:id="4b4efd61-b425-4f28-be60-01dff2cb25be">
+				<set-payload value="some other error in createAccountFlow" doc:name="some other error in createAccountFlow" doc:id="e3c455aa-59e0-44bf-924a-438096f15913" />
+			</on-error-continue>	
+	</error-handler>
+		
+	<error-handler name="checkBalanceFlowErrorHandler" doc:id="05be1ef8-8b0c-4e5f-b369-a765943a5c01" >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="bd763b4d-0083-4caf-afd2-79e6c3683485" type="DB:BAD_SQL_SYNTAX">
+				<set-payload value="DB syntax error" doc:name="DB syntax error" doc:id="66989f15-6ec8-4caf-a407-5bb8cfb97f01" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="02407fd4-6203-4afb-a910-cc40d9733e79" type="DB:QUERY_EXECUTION">
+				<set-payload value="DB query execution error" doc:name="DB query execution error" doc:id="3096b547-883f-4acd-9d25-3f4fcfa3292d" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="986ca88a-7650-44f7-bbd7-f0b8e54c33b1" type="DB:CONNECTIVITY">
+				<set-payload value="DB connectivity error" doc:name="DB connectivity error" doc:id="ac5b3040-fddd-4792-a4c7-fb8774f78b71" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue Any" doc:id="15344adc-179b-4184-a407-23f8767ad0d8" >
+				<set-payload value="some other error in checkBalanceFlow" doc:name="some other error in checkBalanceFlow" doc:id="c1ee4a47-2a9b-4287-95d3-43301905c14a" />
+			</on-error-continue>	
+	</error-handler>	
+	
+	<error-handler name="withdrawAmountFlowErrorHandler" doc:id="bfebd286-2f59-43b9-b831-db42854b42d3">
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="78e43a94-8288-4c93-9432-12f23cd94662" type="DB:BAD_SQL_SYNTAX">
+				<set-payload value="DB syntax error" doc:name="DB syntax error" doc:id="dd80e086-d7d3-4549-b0ff-aceed604971f" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="714d4d7d-0c68-4c6c-9d3f-630787f78739" type="DB:QUERY_EXECUTION">
+				<set-payload value="DB query execution error" doc:name="DB query execution error" doc:id="745f270d-3eca-4c3c-bbea-e25ff5a0e492" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4917c210-7209-4191-b178-717832c50656" type="DB:CONNECTIVITY">
+				<set-payload value="DB connectivity error" doc:name="DB connectivity error" doc:id="18fde8b3-1b35-4513-b6e3-e05c5a10ebfa" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue Any" doc:id="04c7140e-8194-495c-a1e7-d9e0c88f9df4">
+				<set-payload value="some other error in withdrawFlow" doc:name="some other error in withdrawFlow" doc:id="bfd42146-fcc2-4ce7-a0b7-74e1f58d6e04" />
+			</on-error-continue>	
+	</error-handler>
+	
+	<error-handler name="variableSettingFlowErrorHandler" doc:id="ff5d15df-bfca-4ec3-87ff-55ddf104833e" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9fae248e-1608-4de6-b92c-c8db0e3f7839" >
+				<set-payload value="error in variableSettingFlow" doc:name="error in variableSettingFlow" doc:id="0716215c-f0d5-4c4d-a239-5bbb64ec01ce" />
+			</on-error-continue>	
+	</error-handler>	
+	
+	<error-handler name="checkCustomerCredentialsFlowErrorHandler" doc:id="e29d9664-2969-4e84-a41d-eb6e441ae52c" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="387d7e48-d6f9-4e97-a109-17ab62061f3c" type="DB:BAD_SQL_SYNTAX">
+				<set-payload value="DB syntax error" doc:name="DB syntax error" doc:id="46737107-2a14-4f94-b3ec-ad6bdd886ead" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2f9b3bc9-a98a-4a70-9eff-ad8c5a811a79" type="DB:QUERY_EXECUTION">
+				<set-payload value="DB query execution error" doc:name="DB query execution error" doc:id="0a16c10c-3c74-4311-bcf5-5adebae2d70d" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cc887587-5829-4efe-bf69-052891facb79" type="DB:CONNECTIVITY">
+				<set-payload value="DB connectivity error" doc:name="DB connectivity error" doc:id="933ee05a-2672-458e-8eb2-e21fba9783e5" />
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue Any" doc:id="20724ae6-b115-4ec1-8c56-378b61469d33">
+				<set-payload value="some other error in checkCustomerCredentialsFlow" doc:name="some other error in checkCustomerCredentialsFlow" doc:id="a53918d5-e045-4417-b9db-7975a1ae2bb7" />
+			</on-error-continue>	
+	</error-handler>
+		
+	<error-handler name="validateAtmPinFlowErrorHandler" doc:id="4d0337de-ec95-4054-bd86-f1a55fc68ed2" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="377f6e28-e026-467e-93b1-8f72fe619957">
+				<set-payload value="error in validateAtmPinFlow" doc:name="error in validateAtmPinFlow" doc:id="8be50e8b-fb4d-402d-a4ee-be4de780ecd7" />
+			</on-error-continue>
+	</error-handler>
+	
+	<error-handler name="checkSufficientBaalanceFlowErrorHandler" doc:id="273e4e60-80f6-4c42-8eab-8ae681d30ef4" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="93258e46-1f2d-4630-b582-1cefd3313f92">
+				<set-payload value="error in vcheckSufficientBalanceFlow" doc:name="error in checkSufficientBalanceFlow" doc:id="ab87dbcd-e7a1-4e3c-9142-1db10aa493ab" />
+			</on-error-continue>	
+	</error-handler>
+</mule>
