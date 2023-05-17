@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>251dea52-367d-4d3f-aedf-9aaaf94738aa</groupId>
+  <artifactId>bank-api</artifactId>
+  <version>1.0.0</version>
+  <name>bank-api</name>
+  <properties>
+    <classifier>raml</classifier>
+    <main>bank-api.raml</main>
+    <status>published</status>
+    <originalFormatVersion>1.0</originalFormatVersion>
+    <apiVersion>v1</apiVersion>
+    <projectId>9fac9636-c8d1-4cb1-af7e-5e1f2363dd10</projectId>
+    <branchId>master</branchId>
+    <commitId>74bcfdf115007b03c6537f3f7275341545fbda23</commitId>
+    <keywords/>
+    <type>rest-api</type>
+    <mainFile>bank-api.raml</mainFile>
+  </properties>
+  <repositories>
+    <repository>
+      <id>anypoint-exchange</id>
+      <url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+    </repository>
+  </repositories>
+</project>
