@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	
+	<flow name="jmsPublishEmpDetails" doc:id="21c4716f-f5cf-4bf9-9c2f-d8a08990652c" >
+		<http:listener doc:name="Listener" doc:id="571874e9-0916-4f6c-a38f-dad239c4aed2" config-ref="HTTP_Listener_config" path="/j"/>
+		<db:select doc:name="Select" doc:id="0f6b3b97-802e-452a-ad90-6079d98c5897" config-ref="Database_Config-port1434">
+			<db:sql><![CDATA[select * from muleEmployee]]></db:sql>
+		</db:select>
+		
+		<ee:transform doc:name="to JSON" doc:id="072b5493-bba0-4759-9f89-ddee6785294a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish" doc:id="81e8e53a-5254-4ffb-bc88-3a3b579b4f4b" config-ref="JMS_Config5-16-4" destination="bulkUpdate.Q">
+			<jms:message >
+				<jms:properties ><![CDATA[#[{"fromPublisher" : "this comes in the consumer-attribute and data is selected from empDB"}]]]></jms:properties>
+			</jms:message>
+		</jms:publish>
+		<logger level="INFO" doc:name="published to queue" doc:id="d6a1d4a1-1f0d-461e-b922-cce99e675c27" message="published to queue"/>
+		<error-handler ref = "jmsPublishErrorHandler"/>		
+	</flow>
+	<flow name="jmsConsumeAndUpdateEmpSalaryFlow" doc:id="736cf590-7274-4470-b377-e2e0fc167b58" >
+		<jms:listener doc:name="On New Message" doc:id="09948f7b-164c-4a45-9883-5cb7254487b3" config-ref="JMS_Config5-16-4" destination="bulkUpdate.Q" inboundContentType="application/json" numberOfConsumers="2">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="payload in json format consumed from queue" doc:id="9405cbac-9f86-41fb-baab-bd1dba039e21" message="#['\n'] payload in json format consumed from queue is #[payload]"/>
+		<file:write doc:name="Write old employee details as json" doc:id="0f5d7f8e-a9f1-4ac8-ab22-831c85714b73" config-ref="File_Config" path='#["oldEmpDetails-" ++ now() as String {format: "YYYY-MMM-dd-HH-m-s"}  ++".json"]' />
+		<flow-ref doc:name="BulkUpdateEmpDetails_subFlow" doc:id="7122d821-6939-4bd0-a837-b84e7c7458af" name="BulkUpdateEmpDetails_subFlow"/>
+		<logger level="INFO" doc:name="result of bulk update" doc:id="e34bf938-25aa-4900-8780-0eb18cda9d29" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"Log in consume flow":payload}]' />
+		<error-handler ref = "jmsconsumeErrorHandler"/>
+			
+		
+	</flow>
+	<flow name="BulkUpdateEmpDetails_subFlow" doc:id="0926a61c-5c8a-4870-8dfc-426e5d41e059" >
+		<file:read doc:name="Read" doc:id="3efcf9f5-94c8-4382-a8c0-1e7d051d0b44" config-ref="File_Config" path="C:\Users\sujit\Desktop\W3Schools-bookStore\input\bulkUpdateEmp.csv" />
+		<ee:transform doc:name="to json" doc:id="9b793e9d-9c74-4a97-9d35-155b8e7632cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-update doc:name="Bulk update of empSalary" doc:id="f4c4a51e-f50c-44e3-840b-5c5b762017ba" config-ref="Database_Config-port1434" >
+			<db:sql ><![CDATA[update muleEmployee
+set empSalary = :empSalary,
+empName = :empName
+where emp_id = :emp_id]]></db:sql>
+		</db:bulk-update>
+		<logger level="INFO" doc:name="result of bulk update" doc:id="7300d829-bf59-40db-a311-016bd86a5de2" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"log from the subflow" : payload}]'/>
+		<error-handler ref ="bulkUpdateErrorHandler" />			
+	</flow>
+</mule>
