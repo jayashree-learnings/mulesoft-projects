@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">	
+	<error-handler name="subtract_errorHandler" doc:id="23e892cd-f749-45bd-93a4-878193fd644d">
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="70cf7286-7ec7-45d0-9240-a9ed71c834ac" >
+							<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;&#10;{&#10;   "msg": "error in subtraction",&#10;   "reason" : error.description&#10;}]' doc:name="error in subtraction" doc:id="4f7f21c3-264d-4a4b-a911-fc6800cf94b0" mimeType="application/json"/>
+						</on-error-continue>	
+	</error-handler>
+	
+	<error-handler name="multiply_errorHandler" doc:id="28914249-a852-4b35-97d6-efb89cca781d">
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d4f8f517-e64a-4533-860a-3a00170d9705" >
+							<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;&#10;{&#10;   "msg": "error in multiplication",&#10;   "reason" : error.description&#10;}]' doc:name="error in multiplication" doc:id="f8f5276a-63e5-4e74-83de-1a5a8371658c" mimeType="application/json"/>
+						</on-error-continue>	
+	</error-handler>
+	
+	<error-handler name="divide_errorHandler" doc:id="7da013bd-4be8-405c-8b18-16aae8242456">
+<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b519dd14-ca8d-4adc-9c38-c4c3ba6d526f" >
+			<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;&#10;{&#10;   "msg": "error in division",&#10;   "reason" : error.description&#10;}]' doc:name="error in division" doc:id="58b3e99d-2124-470c-881c-88c4c64289c2" mimeType="application/json"/>
+						
+</on-error-continue>
+   </error-handler>
+	<error-handler name="flow_errorHandler" doc:id="5ea8ad4e-76c0-4bbd-8a2b-4fa747ef3027" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9628b088-b982-4c0b-ae80-4d48b2502f12" >
+			<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;&#10;{&#10;   "msg": "error in flow",&#10;   "reason" : error.description&#10;}]' doc:name="error in flow" doc:id="c9671dee-8e6c-4ad1-a28c-5bc49919f9b9" mimeType="application/json" />
+		</on-error-continue>
+	</error-handler>
+	<error-handler name="add_errorHandler" doc:id="e1c09be4-fa09-4ecf-8d86-e834edf638f5">
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e9836526-38e1-48b0-acd4-6f71004a2fd0">
+							<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;&#10;{&#10;   "msg": "error in addition",&#10;   "reason" : error.description&#10;}]' doc:name="error in addition" doc:id="3e7bc414-daea-4098-ba60-2b1ed3d34048" mimeType="application/json" />
+						</on-error-continue>
+	</error-handler>
+
+</mule>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:basic-calculator="http://www.mulesoft.org/schema/mule/basic-calculator" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/basic-calculator http://www.mulesoft.org/schema/mule/basic-calculator/current/mule-basic-calculator.xsd">
+
+<http:listener-config name="HTTP_Listener" doc:name="HTTP Listener config" doc:id="d3d48f3f-9c3e-454e-a76d-14e9331118df" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+</http:listener-config>	
+<basic-calculator:config name="BasicCalculator_Config" doc:name="BasicCalculator Config" doc:id="78e8e814-dfac-4a91-b72e-b9feec547226" property_host="${basicCalculator.host}" property_port="${basicCalculator.port}" property_protocol="${basicCalculator.protocol}"/>
+	<configuration-properties doc:name="Configuration properties" doc:id="1f68c3a2-7891-41f0-9a4a-35a1471fdb73" file="configProperties.yaml" />
+</mule>

@@ -1,0 +1,30 @@
+{
+  "configs": [
+    "errorHandling.xml",
+    "restConnect-calculator-implementation.xml",
+    "globalConfigurations.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:test:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.4.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "configProperties.yaml",
+        "errorHandling.xml",
+        "globalConfigurations.xml",
+        "log4j2.xml",
+        "restConnect-calculator-implementation.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}

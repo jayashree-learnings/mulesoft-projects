@@ -1,0 +1,13 @@
+http:
+  port: "8081"
+
+    
+basicCalculator:
+  host: "proxy-proj08.us-e2.cloudhub.io"
+  port: "80"
+  protocol: "HTTP"
+  id: "84168545363843a8bf733f726bdd8607"
+  secret: "204dCFBF177540509e3C84dCD411cA6C"
+  
+  
+  

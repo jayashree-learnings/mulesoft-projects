@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:basic-calculator="http://www.mulesoft.org/schema/mule/basic-calculator" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core 
+ http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http 
+http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core 
+http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/basic-calculator 
+http://www.mulesoft.org/schema/mule/basic-calculator/current/mule-basic-calculator.xsd">
+
+	
+	<flow name="restConnect-calculatorFlow" doc:id="ced84521-0276-4e27-bc4e-c7681c60c446" >
+		<http:listener doc:name="Listener" doc:id="f2a20237-fd6a-48d8-9900-bc555c6fd59c" config-ref="HTTP_Listener" path="/t"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="69dd1058-d671-4859-8ebe-ea349b892545" >
+			<route>
+				<try doc:name="TryAdd" doc:id="38a9144c-86fa-4be6-9736-f3e121ea492c" >
+					<basic-calculator:create-add doc:name="Create add" doc:id="77210323-2e0b-468b-8281-dfe2bc6b981b" config-ref="BasicCalculator_Config" client-id="${basicCalculator.id}" client-secret="${basicCalculator.secret}"/>
+					<logger level="INFO" doc:name="payload" doc:id="7ce32b8c-a571-4449-b646-250daf5b3b09" message="#['\n']#['\n']********in add route, the pl inside try is #[payload]" />
+					<error-handler ref = "add_errorHandler" />									
+				</try>
+			</route>
+			<route>
+				<try doc:name="TrySubtract" doc:id="812beaac-020f-43b2-89f0-25c81092324a" >
+					<basic-calculator:create-subtract doc:name="Create subtract" doc:id="fe95dfaf-9b08-495e-be74-96d22b36d32d" config-ref="BasicCalculator_Config" client-id="${basicCalculator.id}" client-secret="${basicCalculator.secret}"/>
+					<logger level="INFO" doc:name="payload" doc:id="3da5d66f-fae3-473c-9879-9a2856600ad3" message="#['\n']#['\n']********in subtract route, the pl inside try is #[payload]" />
+					<error-handler ref = "subtract_errorHandler" />			
+					
+				</try>
+			</route>
+			<route>
+				<try doc:name="TryMultiply" doc:id="bf812f6a-b304-4f47-a155-cad776205864" >
+					<basic-calculator:create-multiply doc:name="Create multiply" doc:id="bd7519fc-cb74-48b1-816b-63ad9cffd380" config-ref="BasicCalculator_Config" client-id="${basicCalculator.id}" client-secret="${basicCalculator.secret}"/>
+					<logger level="INFO" doc:name="payload" doc:id="5a73d9ae-dbb7-4f43-bd91-c176cd542310" message="#['\n']#['\n']********in multiply route, the pl inside try is #[payload]" />
+					<error-handler ref = "multiply_errorHandler"/>						
+				</try>
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="4e7014e2-0108-4107-aa57-e332d71e831a" >
+					<basic-calculator:create-divide doc:name="Create divide" doc:id="fc461470-22bd-4e89-b12e-0ce9c5455626" config-ref="BasicCalculator_Config" client-id="${basicCalculator.id}" client-secret="${basicCalculator.secret}"/>
+					<logger level="INFO" doc:name="payload" doc:id="e6781c76-cad7-494c-875a-aedf86f8628f" message="#['\n']#['\n']********in divide route, the pl inside try is #[payload]" />
+					<error-handler ref = "divide_errorHandler"   />				
+				</try>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="payload just after SG" doc:id="4b52621c-b91d-47a5-9013-2251fd456cb7" message="#['\n']#['\n']********just after sg, the pl outside sg  is #[payload]"/>
+		<ee:transform doc:name="extract relevant info" doc:id="5eee0c98-fc2e-439b-8696-129b747e10e6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"sum" : payload."0".payload,
+	"difference" : payload."1".payload,
+	"product" : payload."2".payload,
+	"quotient" : payload."3".payload		
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="payload after transform msg" doc:id="4c5eee6d-b580-4454-8673-d77715af3f24" message="#['\n']#['\n']********after the transform msg, the pl outside sg  is #[payload]"/>
+		<error-handler ref="flow_errorHandler" />
+	</flow>
+</mule>
