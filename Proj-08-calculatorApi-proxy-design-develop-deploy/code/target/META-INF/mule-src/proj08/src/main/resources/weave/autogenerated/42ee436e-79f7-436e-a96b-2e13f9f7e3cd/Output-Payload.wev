@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_42ee436e_79f7_436e_a96b_2e13f9f7e3cd_Output_Payload = {|
+  code: Number, 
+  message: String, 
+  " Quotient": Number | String
+|}
+

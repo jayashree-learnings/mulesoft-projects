@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+<error-handler name="basicCalculator-main-errorHandler" doc:id="87649bf3-ea2f-4559-9e48-7cf03d990439" >
+	<on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request",
+	"reason" : error.description
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>            
+  </error-handler>	
+	
+<error-handler name="basicCalculator-console-errorHandler" doc:id="a662abd2-1a27-4751-bb06-49acc7c974b7" >
+	<on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>	
+</error-handler>
+
+<error-handler name="add-errorHandler" doc:id="0f7f8d9c-0d38-450b-bd2b-705560762547" >
+    <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="18a336ed-d5bc-4f37-b68f-a6663309976c" >
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;&#10;---&#10;{&#10;    &#10;  "message"  : "Something went wrong with addition"&#10;   &#10;}]' doc:name="error in add flow" doc:id="fe5cd378-ec60-4ef4-952d-f43f6211bec8" mimeType="application/json"/>
+			<logger level="INFO" doc:name="payload and type" doc:id="7bab27b8-14cc-4963-aeda-7232f13b21bd" message="#['\n']#['\n']********in on error continue of add,the pl  is #[payload] and type is #[typeOf(payload)]"/>
+			
+</on-error-continue>     
+    </error-handler>	
+	
+	<error-handler name="subtract-errorHandler" doc:id="5523e7e4-bf06-486c-9fdd-acd9730e60d6">
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="970c6cf5-3167-4f2b-9b8c-8089aa92a22d" >
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;&#10;---&#10;{&#10;    &#10;  "message"  : "Something went wrong with subtraction"&#10;   &#10;}]' doc:name="error in subtraction flow" doc:id="87565a62-88ab-4dce-9872-65a94cf18940" mimeType="application/json"/>
+			<logger level="INFO" doc:name="payload and type" doc:id="dae8df12-8261-4776-9434-e80b2c72d2ff" message="#['\n']#['\n']********in on error continue of add,the pl  is #[payload] and type is #[typeOf(payload)]" />
+			
+</on-error-continue>	
+	</error-handler>
+	
+	<error-handler name="multiplication-errorHandler" doc:id="79fc774f-630e-4118-8c96-8ce5418bd645">
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="97152109-ddb8-4f74-ab58-3bfe3ebd5dfe">
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;&#10;---&#10;{&#10;    &#10;  "message"  : "Something went wrong with multiplication"&#10;   &#10;}]' doc:name="error in multiplication flow" doc:id="64182d5d-8491-4c47-9548-70ce8f2d6a8e" mimeType="application/json"/>
+			<logger level="INFO" doc:name="payload and type" doc:id="5f177c63-116e-4d2a-97fa-7c6a5a310f48" message="#['\n']#['\n']********in on error continue of add,the pl  is #[payload] and type is #[typeOf(payload)]" />
+			
+</on-error-continue>	
+	</error-handler>
+	
+	<error-handler name="division-errorHandler" doc:id="d124c5a5-7ca5-46f4-bff4-70996de70665">
+	<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f3c9a54e-0aa6-414a-a7a5-92c229669863" >
+				<set-payload value='#[%dw 2.0&#10;output application/json&#10;&#10;&#10;---&#10;{&#10;    &#10;  "message"  : "Something went wrong with division"&#10;   &#10;}]' doc:name="error in division flow" doc:id="2ed337d2-a5b3-4964-918d-98dbe76013d5" mimeType="application/json"/>
+			<logger level="INFO" doc:name="payload and type" doc:id="2db8d547-0b10-4907-b27c-e2212798cc2b" message="#['\n']#['\n']********in on error continue of add,the pl  is #[payload] and type is #[typeOf(payload)]" />
+			
+</on-error-continue>	
+	</error-handler>
+</mule>
