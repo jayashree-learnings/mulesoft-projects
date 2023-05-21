@@ -1,0 +1,81 @@
+#%RAML 1.0
+title: basicCalculator
+documentation: 
+  - !include documentation/documentation.raml 
+  
+types:
+  inputType: !include dataTypes/inputNumbersDataType.raml
+  successAddResponeType: !include dataTypes/successAddDataType.raml
+  successSubtractResponeType: !include dataTypes/successSubtractDataType.raml
+  successMultiplicationResponeType: !include dataTypes/successMultiplicationDataType.raml
+  successDivisionResponeType: !include dataTypes/successDivisionDataType.raml
+
+traits:
+  client-id-enforcement-required:
+    headers:
+      client-id:
+        type: string
+      client-secret: 
+        type: string
+    responses:
+      401:
+        description: unauthorized access.check credentials
+
+/add:
+  displayName: Addition
+  description: returns the sum of 2 given numbers
+  post:
+    is: [client-id-enforcement-required]  
+    body:
+      application/json:
+        type: inputType
+    responses:
+      200:
+        body:
+          application/json:
+            type: successAddResponeType 
+
+/subtract:
+  displayName: Subtraction
+  description: returns the difference of 2 given numbers
+  post:
+    is: [client-id-enforcement-required]  
+    body:
+      application/json:
+        type: inputType
+    responses:
+      200:
+        body:
+          application/json:
+            type: successSubtractResponeType
+
+/multiply:
+  displayName: Multiplication
+  description: returns the product of 2 given numbers
+  post:
+    is: [client-id-enforcement-required]    
+    body:
+      application/json:
+        type: inputType
+    responses:
+      200:
+        body:
+          application/json:
+            type: successMultiplicationResponeType
+
+/divide:
+  displayName: Division
+  description: returns the quotient of 2 given numbers
+  post:
+    is: [client-id-enforcement-required]  
+    body:
+      application/json:
+        type: inputType
+    responses:
+      200:
+        body:
+          application/json:
+            type: successDivisionResponeType
+
+
+        

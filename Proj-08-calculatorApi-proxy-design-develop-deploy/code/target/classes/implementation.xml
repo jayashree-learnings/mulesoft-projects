@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	
+	<flow name="additionFlow" doc:id="847b65a6-e6f9-412b-b275-c34c1cf30f71" >
+		<flow-ref doc:name="saveNumbers_subFlow" doc:id="13b5ef11-910e-467d-b441-c192c60a2c51" name="saveNumbers_subFlow"/>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var result_add = vars.num1 + vars.num2
+---
+{
+  "code" : 200,
+  "message" : "success!  ",
+  "result": result_add
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref = "add-errorHandler"/>			
+		
+</flow>
+	
+	<flow name="subtractionFlow" doc:id="2ce06f49-3764-4000-b624-451f30e6f141" >
+	<flow-ref doc:name="saveNumbers_subFlow" doc:id="a7befec2-a5ca-4168-a8c3-986f7de021f8" name="saveNumbers_subFlow" />
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var result_sub = vars.num1 - vars.num2
+---
+{
+  "code"   : 200,
+  "message" : "success! ",
+  "Difference" : result_sub
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref = "subtract-errorHandler"/>	
+</flow>	
+	
+	<flow name="multiplicationFlow" doc:id="ed2e3cf2-36e2-480e-b941-6ce393093a8e">
+	<flow-ref doc:name="saveNumbers_subFlow" doc:id="51f4b7e8-457e-44aa-b52e-0d23f0d51b5e" name="saveNumbers_subFlow" />
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var result_mult = vars.num1 * vars.num2
+---
+{
+  "code"    : 200,
+  "message"  : "success!",
+   "Product"  : result_mult
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref = "multiplication-errorHandler" />	
+</flow>
+
+	<flow name="divisionFlow" doc:id="42ee436e-79f7-436e-a96b-2e13f9f7e3cd" >	
+	<flow-ref doc:name="saveNumbers_subFlow" doc:id="2a3cd301-cdca-46a9-867f-faf5741481fa" name="saveNumbers_subFlow" />
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ 
+var result_div = 
+	if(vars.num2 != 0) vars.num1 / vars.num2 
+	else "cant divide by zero"
+---
+{
+  "code" :  200,
+  "message" : "success!",
+  " Quotient" : result_div
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref = "division-errorHandler"/>		
+</flow>
+	<sub-flow name="saveNumbers_subFlow" doc:id="14aee2c0-1abe-4ae8-956f-66b5454de0b7" >
+		<ee:transform doc:name="saveNumbers" doc:id="60535a69-dda1-4d7b-85ed-a4ff5bda2319" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="num1" ><![CDATA[%dw 2.0
+output application/java
+
+var num1 = payload.num1
+---
+num1]]></ee:set-variable>
+				<ee:set-variable variableName="num2" ><![CDATA[%dw 2.0
+output application/java
+
+var num2 = payload.num2
+---
+num2]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</sub-flow>		
+</mule>
