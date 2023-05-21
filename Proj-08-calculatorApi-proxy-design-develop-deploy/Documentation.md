@@ -83,7 +83,7 @@ The general concept about end point configuration is like this
 The access is requested to the published api in the exchange using a registered client application and the credentials client-id and client-secret obtained. The client application is visible in exchange-public portal-my applications and the credentials can be seen.
 ##### ![platform-03](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-08/platform03-publicPortal-applicationwhichRequestedAccess-CanSeeCred.PNG)  
 
-The various results of testing in postman are shown.
+The various results of testing the proxy application in postman are shown.
 proxy url does not work when wrong incomplete credentials are given
 ##### ![d3-1b01](https://github.com/jayashree-learnings/mulesoft-projects/blob/main/00_includes/proj-08/d3-1b01-proxyUrlAfterApplyingcclientIdpolicyGivingWrongCred.PNG) 
 
